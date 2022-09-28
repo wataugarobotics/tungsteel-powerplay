@@ -16,9 +16,7 @@ jobs:
         with:
           java-version: 18
           distribution: temurin
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v2
-      - name: Clean
-        run: ./gradlew clean
       - name: Build
-        run: ./gradlew build --info
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: build
