@@ -2,29 +2,21 @@ package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.commands.RunMotorCommand;
-import org.firstinspires.ftc.teamcode.commands.StopMotorCommand;
-import org.firstinspires.ftc.teamcode.subsystems.BasicSubsystem;
+import org.firstinspires.ftc.teamcode.commands.DriveCommand;
+import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 
 @TeleOp
 public class OneDriver extends CommandOpMode {
-    private BasicSubsystem subsystem;
+    private Drivetrain drivetrain;
     private GamepadEx gamepad;
 
     @Override
     public void initialize() {
         gamepad = new GamepadEx(gamepad1);
+        drivetrain = new Drivetrain(hardwareMap, gamepad);
 
-        subsystem = new BasicSubsystem(hardwareMap.get(DcMotor.class, "motor"), telemetry);
-
-        // bindings
-        gamepad.getGamepadButton(GamepadKeys.Button.A)
-                .whenPressed(new RunMotorCommand(subsystem));
-        gamepad.getGamepadButton(GamepadKeys.Button.B)
-                .whenPressed(new StopMotorCommand(subsystem));
+        drivetrain.setDefaultCommand(new DriveCommand(drivetrain));
     }
 }
