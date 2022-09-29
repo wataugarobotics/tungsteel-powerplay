@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.arcrobotics.ftclib.hardware.RevIMU;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
@@ -19,6 +20,7 @@ public class Drivetrain extends SubsystemBase {
     private final DoubleSupplier leftY;
     private final DoubleSupplier rightX;
     private final MecanumDrive drive;
+    private RevIMU imu;
 
     /**
      * Constructs a Drivetrain using the "leftFront", "rightFront", "leftRear", and "rightRear"
@@ -35,20 +37,26 @@ public class Drivetrain extends SubsystemBase {
         this.drive = new MecanumDrive(leftFront, rightFront, leftRear, rightRear);
         drive.setMaxSpeed(speedMod);
 
+        this.imu = new RevIMU(hwMap, "imu");
+        imu.init();
+
         this.leftX = gamepad::getLeftX;
         this.leftY = gamepad::getLeftY;
         this.rightX = gamepad::getRightX;
     }
 
     /**
-     * Gets the joystick positions and sets the motor power to drive the robot.
+     * Gets the joystick positions and sets the motor power to drive the robot. The robot will
+     * drive relative to the field using the onboard gyro.
      */
     public void drive() {
         double strafeSpeed = leftX.getAsDouble();
         double forwardSpeed = leftY.getAsDouble();
         double turnSpeed = rightX.getAsDouble();
 
+        double heading = imu.getHeading();
+
         drive.setMaxSpeed(speedMod);
-        drive.driveRobotCentric(strafeSpeed, forwardSpeed, turnSpeed);
+        drive.driveFieldCentric(strafeSpeed, forwardSpeed, turnSpeed, heading);
     }
 }
