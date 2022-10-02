@@ -1,12 +1,12 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
-import com.arcrobotics.ftclib.controller.wpilibcontroller.ElevatorFeedforward;
+import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-public class Lift extends SubsystemBase {
-    public enum Position {
+public final class Lift extends SubsystemBase {
+    public enum Level {
         Floor(0.0),
         Short(1.0),
         Medium(2.0),
@@ -14,11 +14,11 @@ public class Lift extends SubsystemBase {
 
         public final double pos;
 
-        private Position(double pos) {
+        Level(double pos) {
             this.pos = pos;
         }
 
-        public Position up() {
+        public Level up() {
             switch (this) {
                 case Floor:
                     return Short;
@@ -32,7 +32,7 @@ public class Lift extends SubsystemBase {
             }
         }
 
-        public Position down() {
+        public Level down() {
             switch (this) {
                 case Floor:
                 case Short:
@@ -47,26 +47,70 @@ public class Lift extends SubsystemBase {
         }
     }
 
-    private Position position = Position.Floor;
-    private MotorEx motor;
+    private static final double KS = 0.0; // TODO
+    private static final double KV = 0.0; // TODO
+    private static final double KA = 0.0; // TODO
+    private static final double KP = 0.0; // TODO
+    private static final double DIST_PER_TICK = 1.0; // TODO
 
+    private Level level = Level.Floor;
+    private final MotorEx motor;
+
+    /**
+     * Should be in the range [0, 1].
+     */
+    public double speedMod = 1.0;
+
+    /**
+     * Constructs a Lift with a HardwareMap. This uses the id "lift" to get the motor.
+     * @param hwMap the HardwareMap
+     */
     public Lift(HardwareMap hwMap) {
-        this.motor = new MotorEx(hwMap, "lift");
+        motor = new MotorEx(hwMap, "lift");
+        motor.setDistancePerPulse(DIST_PER_TICK);
+        motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        motor.setRunMode(Motor.RunMode.PositionControl);
+        motor.setPositionCoefficient(KP);
+        motor.setFeedforwardCoefficients(KS, KV, KA);
     }
 
+    /**
+     * Moves the lift up 1 level. This is saturating, meaning if the lift is at the top level it
+     * will stay at the top level.
+     */
     public void up() {
-        this.setPosition(position.up());
+        setLevel(level.up());
     }
+
+    /**
+     * Moves the lift down 1 level. This is saturating, meaning if the lift is at the bottom level
+     * it will stay at the bottom level.
+     */
     public void down() {
-        this.setPosition(position.down());
+        setLevel(level.down());
     }
 
-    public Position getPosition() {
-        return position;
+    /**
+     * Gets the target level.
+     * @return the current target level
+     */
+    public Level getLevel() {
+        return level;
     }
 
-    public void setPosition(Position pos) {
-        // TODO
-        this.position = pos;
+    /**
+     * Sets the target level of the lift.
+     * @param level the new level to set
+     */
+    public void setLevel(Level level) {
+        this.level = level;
+        motor.setTargetDistance(level.pos);
+    }
+
+    /**
+     * Should be called in a loop to set the motor power.
+     */
+    public void update() {
+        motor.set(speedMod);
     }
 }
