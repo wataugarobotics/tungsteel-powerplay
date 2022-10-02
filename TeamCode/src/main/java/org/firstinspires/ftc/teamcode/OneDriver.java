@@ -23,13 +23,15 @@ public class OneDriver extends CommandOpMode {
         Lift lift = new Lift(hardwareMap);
 
         gamepad.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
-                .whenPressed(new InstantCommand(lift::down));
+                .whenPressed(new InstantCommand(lift::down, lift));
         gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
-                .whenPressed(new InstantCommand(lift::up));
+                .whenPressed(new InstantCommand(lift::up, lift));
 
-        // This will run the command whenever no other command that uses the drivetrain is running,
-        // constantly updating the motor powers with the gamepad information.
+        // The default commands will run whenever no other command requires the corresponding
+        // subsystem, constantly updating the motor powers.
         drivetrain.setDefaultCommand(new DriveCommand(drivetrain, gamepad));
+        lift.setDefaultCommand(new RunCommand(lift::update, lift));
+
         schedule(new RunCommand(telemetry::update));
     }
 }
