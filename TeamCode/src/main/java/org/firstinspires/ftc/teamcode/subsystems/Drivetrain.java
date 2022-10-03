@@ -7,7 +7,7 @@ import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 /**
- * A subsystem representing the robot drivetrain.
+ * This subsystem represents the robot's mecanum drivetrain.
  */
 public class Drivetrain extends SubsystemBase {
     /**
@@ -15,7 +15,7 @@ public class Drivetrain extends SubsystemBase {
      */
     public double speedMod = 1.0;
     private final MecanumDrive drive;
-    private RevIMU imu;
+    private final RevIMU imu;
 
     /**
      * Constructs a Drivetrain using the "leftFront", "rightFront", "leftRear", and "rightRear"

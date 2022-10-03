@@ -7,6 +7,9 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 
+/**
+ * This subsystem wraps an {@link OpenCvCamera}.
+ */
 public class Camera extends SubsystemBase {
 
     public OpenCvCamera camera;
