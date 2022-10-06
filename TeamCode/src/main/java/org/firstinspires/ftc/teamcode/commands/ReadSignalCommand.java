@@ -73,7 +73,7 @@ public class ReadSignalCommand extends CommandBase {
                 break;
             }
             if (framesWithoutDetection >= 6) {
-                aprilTagDetectionPipeline.setDecimation(3.0f);
+                aprilTagDetectionPipeline.setDecimation(2.0f);
             }
         }
     }
