@@ -5,19 +5,33 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-public final class Lift extends SubsystemBase {
+/**
+ * This subsystem controls the robot's lift.
+ */
+public class Lift extends SubsystemBase {
+    /**
+     * The level that the lift is at.
+     */
     public enum Level {
+        /** The lowest setting */
         Floor(0.0),
+        /** The short pole junctions */
         Short(1.0),
+        /** The medium-length pole junctions */
         Medium(2.0),
+        /** The long pole junctions */
         Long(3.0);
 
+        /** The position of the lift at a given setting in meters */
         public final double pos;
 
         Level(double pos) {
             this.pos = pos;
         }
 
+        /**
+         * Increments the level without wrapping.
+         */
         public Level up() {
             switch (this) {
                 case Floor:
@@ -32,6 +46,9 @@ public final class Lift extends SubsystemBase {
             }
         }
 
+        /**
+         * Decrements the level without wrapping.
+         */
         public Level down() {
             switch (this) {
                 case Floor:
@@ -57,7 +74,7 @@ public final class Lift extends SubsystemBase {
     private final MotorEx motor;
 
     /**
-     * Should be in the range [0, 1].
+     * The multiplier used for the motor power. Should be in the range [0, 1].
      */
     public double speedMod = 1.0;
 
