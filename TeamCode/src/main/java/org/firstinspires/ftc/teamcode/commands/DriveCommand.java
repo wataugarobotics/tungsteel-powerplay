@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
  */
 public class DriveCommand extends RunCommand {
     public DriveCommand(Drivetrain drivetrain, GamepadEx gamepad) {
-        super(() -> drivetrain.driveFieldCentric(
+        super(() -> drivetrain.driveRobotCentric(
                 gamepad.getLeftY(),
                 gamepad.getLeftX(),
                 -gamepad.getRightX()

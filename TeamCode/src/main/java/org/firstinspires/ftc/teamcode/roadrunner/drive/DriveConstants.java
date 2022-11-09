@@ -43,7 +43,7 @@ public class DriveConstants {
      * angular distances although most angular parameters are wrapped in Math.toRadians() for
      * convenience. Make sure to exclude any gear ratio included in MOTOR_CONFIG from GEAR_RATIO.
      */
-    public static double WHEEL_RADIUS = 1.88976; // in, 48mm
+    public static double WHEEL_RADIUS = 1.89; // in, 48mm
     public static double GEAR_RATIO = 19.2; // output (wheel) speed / input (motor) speed
     public static double TRACK_WIDTH = 16.5; // in
 
@@ -53,9 +53,9 @@ public class DriveConstants {
      * motor encoders or have elected not to use them for velocity control, these values should be
      * empirically tuned.
      */
-    public static double kV = 1.0 / rpmToVelocity(MAX_RPM); // TODO
-    public static double kA = 0.0; // TODO
-    public static double kStatic = 0.0; // TODO
+    public static double kV = 0.023; // TODO
+    public static double kA = 0.006; // TODO
+    public static double kStatic = 0.005; // TODO
 
     /*
      * These values are used to generate the trajectories for you robot. To ensure proper operation,
@@ -64,17 +64,17 @@ public class DriveConstants {
      * small and gradually increase them later after everything is working. All distance units are
      * inches.
      */
-    public static double MAX_VEL = 30; // TODO
-    public static double MAX_ACCEL = 30; // TODO
-    public static double MAX_ANG_VEL = Math.toRadians(60); // TODO
-    public static double MAX_ANG_ACCEL = Math.toRadians(60); // TODO
+    public static double MAX_VEL = 49.95; // 90% of 52.17, the actual measured max velocity
+    public static double MAX_ACCEL = 49.95; // TODO
+    public static double MAX_ANG_VEL = Math.toRadians(60.0); // TODO
+    public static double MAX_ANG_ACCEL = Math.toRadians(60.0); // TODO
 
     public static double encoderTicksToInches(double ticks) {
-        return WHEEL_RADIUS * 2 * Math.PI * GEAR_RATIO * ticks / TICKS_PER_REV;
+        return WHEEL_RADIUS * 2.0 * Math.PI * GEAR_RATIO * ticks / TICKS_PER_REV;
     }
 
     public static double rpmToVelocity(double rpm) {
-        return rpm * GEAR_RATIO * 2 * Math.PI * WHEEL_RADIUS / 60.0;
+        return rpm * GEAR_RATIO * 2.0 * Math.PI * WHEEL_RADIUS / 60.0;
     }
 
     public static double getMotorVelocityF(double ticksPerSecond) {
