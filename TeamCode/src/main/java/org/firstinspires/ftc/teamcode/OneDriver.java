@@ -8,6 +8,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.commands.DriveCommand;
+import org.firstinspires.ftc.teamcode.subsystems.Claw;
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain;
 import org.firstinspires.ftc.teamcode.subsystems.Lift;
 
@@ -20,12 +21,15 @@ public class OneDriver extends CommandOpMode {
     public void initialize() {
         GamepadEx gamepad = new GamepadEx(gamepad1);
         Drivetrain drivetrain = new Drivetrain(hardwareMap);
+        Claw claw = new Claw(hardwareMap);
         Lift lift = new Lift(hardwareMap);
 
         gamepad.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
                 .whenPressed(new InstantCommand(lift::down, lift));
         gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
                 .whenPressed(new InstantCommand(lift::up, lift));
+        gamepad.getGamepadButton(GamepadKeys.Button.A)
+                .whenPressed(new InstantCommand(claw::toggle, claw));
 
         // The default commands will run whenever no other command requires the corresponding
         // subsystem, constantly updating the motor powers.
