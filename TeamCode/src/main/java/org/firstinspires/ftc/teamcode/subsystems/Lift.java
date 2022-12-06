@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import androidx.annotation.NonNull;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
@@ -11,26 +9,23 @@ import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.arcrobotics.ftclib.hardware.motors.MotorGroup;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.util.Level;
-
-import java.util.List;
 
 @Config
 public class Lift extends SubsystemBase {
-    public static double KP = .01;
+    public static double KP = 0.01;
     public static double KI = 0.0;
     public static double KD = 0.0;
     public static double KF = 0.0;
 
     private Level level = Level.Floor;
     private final MotorGroup motor;
-    FtcDashboard dashboard = FtcDashboard.getInstance();
-    Telemetry dashboardTelemetry = dashboard.getTelemetry();
+    private final FtcDashboard dashboard = FtcDashboard.getInstance();
+    private final Telemetry dashboardTelemetry = dashboard.getTelemetry();
     private final PIDFController pidf;
     private boolean emergencyStop = false;
 
     /**
-     * Constructs a Lift with a HardwareMap. This uses the id "lift" to get the motor.
+     * Constructs a Lift with a HardwareMap.
      * @param hwMap the HardwareMap
      */
     public Lift(HardwareMap hwMap) {
@@ -43,24 +38,16 @@ public class Lift extends SubsystemBase {
         motor.setRunMode(Motor.RunMode.PositionControl);
         motor.resetEncoder();
         pidf = new PIDFController(KP, KI, KD, KF);
-
     }
 
-    /**
-     * Returns the average of a List of doubles
-     * Applicable to any List of doubles, but primarily for MotorGroup.getPositions()
-     * @param doubleList
-     * @return double
-     */
-    private double avg(@NonNull List<Double> doubleList){
-        double total = 0;
-        for (double d :doubleList) {
-            total += d;
-        }
-        return total / doubleList.size();
+    private double positionAvg() {
+        return motor
+                .getPositions()
+                .stream()
+                .mapToDouble(d -> d)
+                .average()
+                .orElse(0.0);
     }
-
-
 
     /* **** Commands: **** */
 
@@ -68,9 +55,12 @@ public class Lift extends SubsystemBase {
      * Should be called in a loop to set the motor power.
      */
     public void update() {
-        if(!emergencyStop) motor.set(pidf.calculate(avg(motor.getPositions())));
+        if(!emergencyStop) {
+            motor.set(pidf.calculate(positionAvg()));
+        }
         else motor.set(0);
     }
+
     /**
      * Moves the lift up 1 level. This is saturating, meaning if the lift is at the top level it
      * will stay at the top level.
@@ -102,14 +92,14 @@ public class Lift extends SubsystemBase {
     public void toggleStop(){
         emergencyStop = !emergencyStop;
     }
+
     /**
      * Sets the target level of the lift.
      * @param level the new level to set
      */
     public void setLevel(Level level) {
         this.level = level;
-        pidf.setPIDF(KP,KI,KD,KF);
-        //
+        pidf.setPIDF(KP, KI, KD, KF);
         pidf.setSetPoint(level.pos);
     }
 
@@ -119,10 +109,51 @@ public class Lift extends SubsystemBase {
      * The FTC Dashboard address is 192.168.43.1:8080/dash
      */
     public void sendTelemetry(){
-        dashboardTelemetry.addData("Lift Position", avg(motor.getPositions()));
+        dashboardTelemetry.addData("Lift Position", positionAvg());
         dashboardTelemetry.addData("Lift Target", level.pos);
-        dashboardTelemetry.addData("Lift Error", avg(motor.getPositions())- level.pos);
+        dashboardTelemetry.addData("Lift Error", positionAvg() - level.pos);
         dashboardTelemetry.addData("Lift Velocity", motor.getVelocity());
         dashboardTelemetry.update();
+    }
+
+    public enum Level {
+        Floor(0.0),
+        Short(1000.0),
+        Medium(3315.0),
+        Long(3000.0);
+
+        public final double pos;
+
+        Level(double pos) {
+            this.pos = pos;
+        }
+
+        public Level up() {
+            switch (this) {
+                case Floor:
+                    return Short;
+                case Short:
+                    return Medium;
+                case Medium:
+                case Long:
+                    return Long;
+                default: // unreachable
+                    return Floor;
+            }
+        }
+
+        public Level down() {
+            switch (this) {
+                case Floor:
+                case Short:
+                    return Floor;
+                case Medium:
+                    return Short;
+                case Long:
+                    return Medium;
+                default: // unreachable
+                    return Long;
+            }
+        }
     }
 }
