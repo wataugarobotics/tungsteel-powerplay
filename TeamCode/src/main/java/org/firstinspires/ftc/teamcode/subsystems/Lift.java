@@ -10,15 +10,13 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.arcrobotics.ftclib.hardware.motors.MotorGroup;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.Level;
 
 import java.util.List;
 
 @Config
-public final class Lift extends SubsystemBase {
-
+public class Lift extends SubsystemBase {
     public static double KP = .01;
     public static double KI = 0.0;
     public static double KD = 0.0;
