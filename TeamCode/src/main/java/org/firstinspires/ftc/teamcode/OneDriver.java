@@ -35,7 +35,7 @@ public class OneDriver extends CommandOpMode {
         // The default commands will run whenever no other command requires the corresponding
         // subsystem, constantly updating the motor powers.
         drivetrain.setDefaultCommand(new DriveCommand(drivetrain, gamepad));
-        // lift.setDefaultCommand(new RunCommand(lift::update, lift));
+        lift.setDefaultCommand(new RunCommand(lift::update, lift));
 
         schedule(new RunCommand(telemetry::update));
     }
