@@ -21,6 +21,7 @@ public class OneDriver extends CommandOpMode {
     public void initialize() {
         GamepadEx gamepad = new GamepadEx(gamepad1);
         Drivetrain drivetrain = new Drivetrain(hardwareMap);
+
         Claw claw = new Claw(hardwareMap);
         Lift lift = new Lift(hardwareMap);
 

@@ -39,9 +39,17 @@ public class Drivetrain extends SubsystemBase {
      * Gets the joystick positions and sets the motor power to drive the robot. The robot will
      * drive relative to the field using the onboard gyro.
      */
-    public void drive(double strafeSpeed, double forwardSpeed, double turnSpeed) {
+    public void driveFieldCentric(double strafeSpeed, double forwardSpeed, double turnSpeed) {
         double heading = imu.getHeading();
         drive.setMaxSpeed(speedMod);
         drive.driveFieldCentric(strafeSpeed, forwardSpeed, turnSpeed, heading);
+    }
+
+    /**
+     * Gets the joystick positions and sets the motor power to drive the robot.
+     */
+    public void driveRobotCentric(double strafeSpeed, double forwardSpeed, double turnSpeed) {
+        drive.setMaxSpeed(speedMod);
+        drive.driveRobotCentric(strafeSpeed, forwardSpeed, turnSpeed);
     }
 }

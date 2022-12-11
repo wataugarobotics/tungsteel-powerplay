@@ -17,7 +17,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
  */
 public class Camera extends SubsystemBase implements CameraStreamSource {
 
-    public OpenCvCamera camera;
+    public final OpenCvCamera camera;
 
     public Camera(HardwareMap hwMap) {
         int cameraMonitorViewId = hwMap

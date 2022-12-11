@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.function.IntConsumer;
 
 /**
- * This command searches the field for apriltags and reads the ID when executed, passing the
+ * This command searches the field for AprilTags and reads the tag ID when executed, passing the
  * ID to a callback.
  */
 public class ReadSignalCommand extends CommandBase {
@@ -22,12 +22,12 @@ public class ReadSignalCommand extends CommandBase {
     private static final double CX = 402.145; // TODO
     private static final double CY = 221.506; // TODO
 
-    private static final int WIDTH = 800; // TODO
-    private static final int HEIGHT = 448; // TODO
+    private static final int WIDTH = 640;
+    private static final int HEIGHT = 480;
 
-    private static final double TAG_SIZE = 0.166; // meters, TODO
+    private static final double TAG_SIZE = 0.030; // meters, TODO
 
-    private final AprilTagDetectionPipeline aprilTagDetectionPipeline = new AprilTagDetectionPipeline(TAG_SIZE, FX, FY, CX, CY);
+    private final AprilTagDetectionPipeline pipeline = new AprilTagDetectionPipeline(TAG_SIZE, FX, FY, CX, CY);
     private final Camera camera;
     private final IntConsumer whenFound;
 
@@ -43,8 +43,8 @@ public class ReadSignalCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        aprilTagDetectionPipeline.setDecimation(3.0f);
-        camera.camera.setPipeline(aprilTagDetectionPipeline);
+        pipeline.setDecimation(3.0f);
+        camera.camera.setPipeline(pipeline);
         camera.camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
@@ -60,20 +60,12 @@ public class ReadSignalCommand extends CommandBase {
 
     @Override
     public void execute() {
-        int framesWithoutDetection = 0;
-
         while (true) {
-            ArrayList<AprilTagDetection> detections = aprilTagDetectionPipeline.getLatestDetections();
-
-            if (detections.size() == 0) {
-                framesWithoutDetection += 1;
-            } else {
+            ArrayList<AprilTagDetection> detections = pipeline.getLatestDetections();
+            if (detections.size() != 0) {
                 int id = detections.get(0).id;
                 whenFound.accept(id);
                 break;
-            }
-            if (framesWithoutDetection >= 6) {
-                aprilTagDetectionPipeline.setDecimation(2.0f);
             }
         }
     }
