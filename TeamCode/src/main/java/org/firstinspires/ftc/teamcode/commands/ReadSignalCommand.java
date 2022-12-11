@@ -25,7 +25,8 @@ public class ReadSignalCommand extends CommandBase {
     private static final int WIDTH = 640;
     private static final int HEIGHT = 480;
 
-    private static final double TAG_SIZE = 0.030; // meters, TODO
+    // meters, irrelevant since we don't need to detect distance
+    private static final double TAG_SIZE = 0.030;
 
     private final AprilTagDetectionPipeline pipeline = new AprilTagDetectionPipeline(TAG_SIZE, FX, FY, CX, CY);
     private final Camera camera;
