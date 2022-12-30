@@ -1,36 +1,78 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.controller.wpilibcontroller.ArmFeedforward;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 /**
- * A gripper mechanism that grabs a stone from the quarry.
- * Centered around the Skystone game for FTC that was done in the 2019
- * to 2020 season.
+ * A virtual four-bar linkage arm, mounted to a set of linear slides.
  */
 public class Arm extends SubsystemBase {
 
-    private final DcMotor armMotor;
-    private final ArmFeedforward feedforward;
-    public static double KS;
-    public static double K_COS;
-    public static double KV;
-    public static double KA;
-    public Arm(final HardwareMap hMap, final String name) {
-        armMotor = hMap.get(DcMotor.class, name);
-        feedforward = new ArmFeedforward(KS, K_COS, KV, KA);
+    private final Servo topServo;
+    private final Servo bottomServo;
+
+    private final FtcDashboard dashboard = FtcDashboard.getInstance();
+    private final Telemetry dashboardTelemetry = dashboard.getTelemetry();
+    private static double position = .50;
+    private final double step = .2;
+    private final double[] RANGE = {72.6, 217.8}; //calculated from Onshape, may be adjusted
+    private final double RADIUS = 1; //TUNE THIS, should be like 318 ish
+
+    public Arm(final HardwareMap hMap) {
+        topServo = hMap.get(Servo.class, "top");
+        bottomServo = hMap.get(Servo.class, "bottom");
     }
 
-    public void spin(double power) {
-        armMotor.setPower(power);
+    public void setPos(){
+        bottomServo.setPosition(position);
+        topServo.setPosition(1 - position);
+        dashboardTelemetry.addData("Arm Target", position);
+        dashboardTelemetry.addData("Arm Angle", getAngle());
     }
-    public void setPos(double angle){
-        double degPerSec = 90;
-        armMotor.setPower(feedforward.calculate(Math.toRadians(angle), Math.toRadians(degPerSec)));
+    public void setPos(double position){
+        this.position = position;
+        setPos();
+    }
+    public void setAngle(double angle){ //in DEGREES
+        angle = Range.clip(angle, RANGE[0], RANGE[1]); //ensure that angle is always within range
+        setPos(
+                (angle - RANGE[0]) / (RANGE[1] - RANGE[0]) //translates and scales angle to position
+        );
+    }
+    public double setTargetXY(double tX, double tY){
+        setAngle(Math.toDegrees(Math.acos(
+            tX/RADIUS
+        )));
+        return tY - (RADIUS * Math.sin(Math.toRadians(getAngle())));
+    }
+    public void move(double step){
+        position += step;
+        if(position > 1) position = 1;
+        else if(position < 0) position = 0;
+        setPos();
+    }
+    public void up(){
+        move(step);
+    }
+    public void down(){
+        move(-step);
+    }
+    public double getAngle(){
+        return position * (RANGE[1] - RANGE[0]) + RANGE[0];
+    }
+    public double getRelativeX(){
+        return RADIUS * Math.cos(Math.toRadians(getAngle()));
+    }
+    public double getRelativeY(){
+        return RADIUS * Math.sin(Math.toRadians(getAngle()));
     }
 
 
