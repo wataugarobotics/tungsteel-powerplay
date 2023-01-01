@@ -25,10 +25,6 @@ public class ArmCalibration extends CommandOpMode {
         gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
                 .whenPressed(new InstantCommand(arm::up, arm));
 
-        // The default commands will run whenever no other command requires the corresponding
-        // subsystem, constantly updating the motor powers.
-        arm.setDefaultCommand(new RunCommand(arm::setPos, arm));
-
         schedule(new RunCommand(telemetry::update));
     }
 }
