@@ -65,7 +65,7 @@ public class Arm extends SubsystemBase {
         move(-step);
     }
     public double getAngle(){
-        return Range.scale(position, 0, 1, RANGE[0], RANGE[1];
+        return Range.scale(position, 0, 1, RANGE[0], RANGE[1]);
     }
     public double getRelativeX(){
         return RADIUS * Math.cos(Math.toRadians(getAngle()));
