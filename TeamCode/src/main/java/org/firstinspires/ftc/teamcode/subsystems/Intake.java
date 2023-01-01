@@ -28,10 +28,14 @@ public class Intake extends SubsystemBase {
         );
     }
 
-    public void toggle(){
-        if(speed == 0) speed = .75;
-        else speed = 0;
+    public void toggle() {
+        if (speed == 0) {
+            speed = 0.75;
+        } else {
+            speed = 0;
+        }
     }
+
     public void run(){
         intake.set(speed);
     }
