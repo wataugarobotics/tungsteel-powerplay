@@ -58,7 +58,7 @@ public class Arm extends SubsystemBase {
         position += step;
         if(position > 1) position = 1;
         else if(position < 0) position = 0;
-        setPos();
+        update();
     }
     public void up(){
         move(step);
