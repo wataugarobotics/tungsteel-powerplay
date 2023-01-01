@@ -55,9 +55,7 @@ public class Arm extends SubsystemBase {
         return tY - (RADIUS * Math.sin(Math.toRadians(getAngle())));
     }
     public void move(double step){
-        position += step;
-        if(position > 1) position = 1;
-        else if(position < 0) position = 0;
+        position = Range.clip(position + step, 0, 1);
         update();
     }
     public void up(){
