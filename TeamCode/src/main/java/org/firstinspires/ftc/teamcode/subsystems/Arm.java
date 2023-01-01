@@ -31,15 +31,16 @@ public class Arm extends SubsystemBase {
         bottomServo = hMap.get(Servo.class, "bottom");
     }
 
-    public void setPos(){
+    public void update() {
         bottomServo.setPosition(position);
         topServo.setPosition(1 - position);
         dashboardTelemetry.addData("Arm Target", position);
         dashboardTelemetry.addData("Arm Angle", getAngle());
     }
-    public void setPos(double position){
+
+    public void setPos(double position) {
         this.position = position;
-        setPos();
+        update();
     }
     public void setAngle(double angle){ //in DEGREES
         angle = Range.clip(angle, RANGE[0], RANGE[1]); //ensure that angle is always within range
