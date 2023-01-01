@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import androidx.annotation.NonNull;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
@@ -18,6 +20,7 @@ public class Lift extends SubsystemBase {
     public static double KF = 0.0;
 
     private Level level = Level.Floor;
+    private LiftPosition offset = new LiftPosition(0);
     private final MotorGroup motor;
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
     private final Telemetry dashboardTelemetry = dashboard.getTelemetry();
@@ -40,13 +43,15 @@ public class Lift extends SubsystemBase {
         pidf = new PIDFController(KP, KI, KD, KF);
     }
 
-    private double positionAvg() {
-        return motor
+    private LiftPosition positionAvg() {
+        return new LiftPosition(
+                LiftPosition.ticksToMm(motor
                 .getPositions()
                 .stream()
                 .mapToDouble(d -> d)
                 .average()
-                .orElse(0.0);
+                .orElse(0.0)
+                ));
     }
 
     /* **** Commands: **** */
@@ -56,11 +61,14 @@ public class Lift extends SubsystemBase {
      */
     public void update() {
         if(!emergencyStop) {
-            motor.set(pidf.calculate(positionAvg()));
+            motor.set(pidf.calculate(positionAvg().ticks()));
         }
         else motor.set(0);
     }
-
+    public void setOffset(double mm){
+        offset.setMm(mm);
+    }
+    public double getOffset() {return offset.mm();}
     /**
      * Moves the lift up 1 level. This is saturating, meaning if the lift is at the top level it
      * will stay at the top level.
@@ -97,10 +105,10 @@ public class Lift extends SubsystemBase {
      * Sets the target level of the lift.
      * @param level the new level to set
      */
-    public void setLevel(Level level) {
+    public void setLevel(@NonNull Level level) {
         this.level = level;
         pidf.setPIDF(KP, KI, KD, KF);
-        pidf.setSetPoint(level.pos);
+        pidf.setSetPoint(level.pos.ticks() + offset.ticks());
     }
 
     /**
@@ -109,23 +117,23 @@ public class Lift extends SubsystemBase {
      * The FTC Dashboard address is 192.168.43.1:8080/dash
      */
     public void sendTelemetry(){
-        dashboardTelemetry.addData("Lift Position", positionAvg());
-        dashboardTelemetry.addData("Lift Target", level.pos);
-        dashboardTelemetry.addData("Lift Error", positionAvg() - level.pos);
-        dashboardTelemetry.addData("Lift Velocity", motor.getVelocity());
+        dashboardTelemetry.addData("Lift Position (mm)", positionAvg().mm());
+        dashboardTelemetry.addData("Lift Target (mm)", level.pos.mm());
+        dashboardTelemetry.addData("Lift Error(mm)", positionAvg().mm()-level.pos.mm());
+        dashboardTelemetry.addData("Lift Velocity", motor.getVelocity()); //Ticks/second?
         dashboardTelemetry.update();
     }
 
     public enum Level {
         Floor(0.0),
-        Short(1000.0),
+        Short(1000.0), //TODO: tune these to actual positions, in MILIMETERS
         Medium(3315.0),
         Long(3000.0);
 
-        public final double pos;
+        public final LiftPosition pos;
 
-        Level(double pos) {
-            this.pos = pos;
+        Level(double mmPos) {
+            this.pos = new LiftPosition(mmPos);
         }
 
         public Level up() {
@@ -155,5 +163,35 @@ public class Lift extends SubsystemBase {
                     return Long;
             }
         }
+    }
+}
+class LiftPosition {
+    private double mm;
+    private double ticks;
+    private static final double TICKS_PER_MM =  384.5 / 112; // Motor tics per revolution divided by circumference of pulley.
+
+    public LiftPosition(double mm){
+        setMm(mm);
+    }
+    public void setMm(double mm){
+        this.mm = mm;
+        this.ticks = mmToTicks(mm);
+    }
+    public void setTicks(double ticks){
+        this.ticks = ticks;
+        this.mm = ticksToMm(ticks);
+    }
+    public double mm() {
+        return mm;
+    }
+    public double ticks() {
+        return ticks;
+    }
+
+    public static double mmToTicks(double mm){
+        return mm * TICKS_PER_MM;
+    }
+    public static double ticksToMm(double ticks){
+        return ticks / TICKS_PER_MM;
     }
 }
