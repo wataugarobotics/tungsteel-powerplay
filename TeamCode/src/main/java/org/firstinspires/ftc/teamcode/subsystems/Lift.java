@@ -47,12 +47,13 @@ public class Lift extends SubsystemBase {
     private LiftPosition positionAvg() {
         return new LiftPosition(
                 LiftPosition.ticksToMm(motor
-                .getPositions()
-                .stream()
-                .mapToDouble(d -> d)
-                .average()
-                .orElse(0.0)
-                ));
+                        .getPositions()
+                        .stream()
+                        .mapToDouble(d -> d)
+                        .average()
+                        .orElse(0.0)
+                )
+        );
     }
 
     /* **** Commands: **** */
@@ -61,26 +62,27 @@ public class Lift extends SubsystemBase {
      * Should be called in a loop to set the motor power.
      */
     public void update() {
-        if(!emergencyStop) {
+        if(emergencyStop)
+            motor.set(0);
+        else
             motor.set(pidf.calculate(positionAvg().ticks()));
-        }
-        else motor.set(0);
     }
-    public void setOffset(double mm){
+    public void setOffset(double mm) {
         offset.setMm(mm);
     }
-    public double getOffset() {return offset.mm();}
+    public double getOffset() {
+        return offset.mm();
+    }
+
     /**
-     * Moves the lift up 1 level. This is saturating, meaning if the lift is at the top level it
-     * will stay at the top level.
+     * Moves the lift up 1 level (saturating).
      */
     public void up() {
         setLevel(level.up());
     }
 
     /**
-     * Moves the lift down 1 level. This is saturating, meaning if the lift is at the bottom level
-     * it will stay at the bottom level.
+     * Moves the lift down 1 level (saturating).
      */
     public void down() {
         setLevel(level.down());
@@ -109,6 +111,10 @@ public class Lift extends SubsystemBase {
     public void setHeight(@NonNull LiftPosition pos) {
         pidf.setPIDF(KP, KI, KD, KF);
         pidf.setSetPoint(pos.ticks() + offset.ticks());
+    }
+
+    public double getHeight() {
+        return offset.mm() + level.pos.mm();
     }
 
     /**
