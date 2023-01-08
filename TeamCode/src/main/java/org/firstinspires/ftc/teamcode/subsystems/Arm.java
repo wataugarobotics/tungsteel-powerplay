@@ -24,7 +24,7 @@ public class Arm extends SubsystemBase {
     private static double position = .50;
     private final double step = .2;
     private final double[] RANGE = {72.6, 217.8}; //calculated from Onshape, may be adjusted
-    private final double RADIUS = 1; // TODO: tune this, should be like 318 ish
+    public final double RADIUS = 264; // Calculated from Onshape
 
     public Arm(final HardwareMap hMap) {
         topServo = hMap.get(Servo.class, "top");
