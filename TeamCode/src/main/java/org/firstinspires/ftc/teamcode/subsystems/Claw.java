@@ -6,8 +6,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 
 public class Claw extends SubsystemBase {
-    private SimpleServo leftServo;
-    private SimpleServo rightServo;
+    private SimpleServo clawServo;
 
     private boolean isOpen = false;
 
@@ -15,17 +14,14 @@ public class Claw extends SubsystemBase {
     private static final double MAX_ANGLE = 100.0;
 
     public Claw(HardwareMap hwMap) {
-        leftServo = new SimpleServo(hwMap, "leftServo", MIN_ANGLE, MAX_ANGLE);
-        rightServo = new SimpleServo(hwMap, "rightServo", MIN_ANGLE, MAX_ANGLE);
+        clawServo = new SimpleServo(hwMap, "claw", MIN_ANGLE, MAX_ANGLE);
     }
     public void open() {
-        leftServo.turnToAngle(MIN_ANGLE);
-        rightServo.turnToAngle(MIN_ANGLE);
+        clawServo.turnToAngle(MIN_ANGLE);
         isOpen = true;
     }
     public void close() {
-        leftServo.turnToAngle(MAX_ANGLE);
-        rightServo.turnToAngle(MAX_ANGLE);
+        clawServo.turnToAngle(MAX_ANGLE);
         isOpen = false;
     }
 
