@@ -2,70 +2,52 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.arcrobotics.ftclib.command.SubsystemBase;
-import com.arcrobotics.ftclib.controller.wpilibcontroller.ArmFeedforward;
-import com.arcrobotics.ftclib.command.SubsystemBase;
-import com.qualcomm.robotcore.hardware.DcMotor;
+import com.arcrobotics.ftclib.hardware.ServoEx;
+import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 /**
  * A virtual four-bar linkage arm, mounted to a set of linear slides.
  */
 public class Arm extends SubsystemBase {
 
-    private final Servo topServo;
-    private final Servo bottomServo;
-
+    private final ServoEx armServo;
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
     private final Telemetry dashboardTelemetry = dashboard.getTelemetry();
-    private static double position = .50;
-    private final double step = .2;
-    private final double[] RANGE = {72.6, 217.8}; //calculated from Onshape, may be adjusted
     public final double RADIUS = 264; // Calculated from Onshape
 
     public Arm(final HardwareMap hMap) {
-        topServo = hMap.get(Servo.class, "top");
-        bottomServo = hMap.get(Servo.class, "bottom");
+        armServo = new SimpleServo(hMap, "top", 72.6, 217.8, AngleUnit.DEGREES); //Calculated from Onshape
     }
 
     public void update() {
-        bottomServo.setPosition(position);
-        topServo.setPosition(1 - position);
-        dashboardTelemetry.addData("Arm Target", position);
         dashboardTelemetry.addData("Arm Angle", getAngle());
     }
 
-    public void setPos(double position) {
-        this.position = position;
-        update();
+    public void setAngle(double angleDegrees){
+        armServo.turnToAngle(angleDegrees, AngleUnit.DEGREES);
     }
-    public void setAngle(double angle){ //in DEGREES
-        angle = Range.clip(angle, RANGE[0], RANGE[1]); //ensure that angle is always within range
-        setPos(
-                (angle - RANGE[0]) / (RANGE[1] - RANGE[0]) //translates and scales angle to position
-        );
-    }
-    public double setTargetXY(double tX, double tY){
-        setAngle(Math.toDegrees(Math.acos(
+    public void setTargetX(double tX){ //Sam is going to dislike how I did this
+        armServo.turnToAngle(Math.acos(
             tX/RADIUS
-        )));
+        ), AngleUnit.DEGREES);
+    }
+    public double getTargetY(double tY){
         return tY - (RADIUS * Math.sin(Math.toRadians(getAngle())));
     }
-    public void move(double step){
-        position = Range.clip(position + step, 0, 1);
-        update();
-    }
     public void up(){
-        move(step);
+        armServo.rotateByAngle(30);
     }
     public void down(){
-        move(-step);
+        armServo.rotateByAngle(-30);
     }
     public double getAngle(){
-        return Range.scale(position, 0, 1, RANGE[0], RANGE[1]);
+        return armServo.getAngle(AngleUnit.DEGREES);
     }
     public double getRelativeX(){
         return RADIUS * Math.cos(Math.toRadians(getAngle()));

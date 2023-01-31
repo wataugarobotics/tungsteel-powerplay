@@ -10,19 +10,16 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.arcrobotics.ftclib.hardware.motors.MotorGroup;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.LiftPosition;
 
 @Config
-public class Lift extends SubsystemBase {
-    public static double KP = .04;
-    public static double KI = 0.0001;
-    public static double KD = 0.0008;
-    public static double KF = 0.0001;
-    public static double TE = 5.0;
-    public static double TD = 5.0;
+public class LiftRedux extends SubsystemBase {
+    public static double KP = 1;
+    public static double KI = 0.0;
+    public static double KD = 0.0;
+    public static double KF = 0.0;
 
     private Level level = Level.Floor;
     private LiftPosition offset = new LiftPosition(0);
@@ -31,26 +28,22 @@ public class Lift extends SubsystemBase {
     private final Telemetry dashboardTelemetry = dashboard.getTelemetry();
     private final PIDFController pidf;
     private boolean emergencyStop = false;
-    private final LiftPosition MAX_HEIGHT;
 
     /**
      * Constructs a Lift with a HardwareMap.
      * @param hwMap the HardwareMap
      */
-    public Lift(HardwareMap hwMap) {
+    public LiftRedux(HardwareMap hwMap) {
         motor = new MotorGroup(
                 new MotorEx(hwMap, "lift0", Motor.GoBILDA.RPM_435),
                 new MotorEx(hwMap, "lift1", Motor.GoBILDA.RPM_435)
         );
         motor.setInverted(true);
         motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-        motor.setRunMode(Motor.RunMode.VelocityControl);
-        motor.setVeloCoefficients(KP, KI, KD);
+        motor.setRunMode(Motor.RunMode.PositionControl);
         motor.resetEncoder();
         pidf = new PIDFController(KP, KI, KD, KF);
-        pidf.setTolerance(TE, TD);
         pidf.setSetPoint(0);
-        MAX_HEIGHT = new LiftPosition(960);
     }
 
     private LiftPosition positionAvg() {
@@ -72,15 +65,14 @@ public class Lift extends SubsystemBase {
      */
     public void update() {
         sendTelemetry();
-        double speedTarget= pidf.calculate(positionAvg().ticks(), level.pos.ticks());
-        if(emergencyStop || pidf.atSetPoint())
-            motor.stopMotor();
+        double speedTarget= pidf.calculate(motor.getPositions().get(0), level.pos.ticks());
+        if(emergencyStop)
+            motor.set(0);
         else
             motor.set(speedTarget);
         dashboardTelemetry.addData("PIDF calc target", speedTarget);
 
     }
-
     public void setOffset(double mm) {
         offset.setMm(mm);
     }
@@ -124,9 +116,7 @@ public class Lift extends SubsystemBase {
      */
     public void setHeight(@NonNull LiftPosition pos) {
         pidf.setPIDF(KP, KI, KD, KF);
-        pidf.setTolerance(TE, TD);
-        //Range.clip protects from inadvertently setting it too high or too low
-        pidf.setSetPoint(Range.clip(pos.ticks() + offset.ticks(),0, MAX_HEIGHT.ticks()));
+        pidf.setSetPoint(pos.ticks() + offset.ticks());
     }
 
     public double getTargetHeight() {
@@ -148,8 +138,8 @@ public class Lift extends SubsystemBase {
      * The FTC Dashboard address is 192.168.43.1:8080/dash
      */
     public void sendTelemetry(){
-        dashboardTelemetry.addData("Lift Position (mm)", positionAvg().mm());
-        dashboardTelemetry.addData("Lift Target (mm)", level.pos.mm());
+        dashboardTelemetry.addData("Lift Position (ticks)", positionAvg().ticks());
+        dashboardTelemetry.addData("Lift Target (ticks)", level.pos.ticks());
         dashboardTelemetry.addData("Lift Error(mm)", positionAvg().mm()-level.pos.mm());
         dashboardTelemetry.addData("Lift Velocity", motor.getVelocity()); //Ticks/second?
         dashboardTelemetry.update();
@@ -157,9 +147,9 @@ public class Lift extends SubsystemBase {
 
     public enum Level {
         Floor(0.0),
-        Short(250.0), //TODO: tune these to actual positions, in MILLIMETERS
-        Medium(500.0),
-        Long(960.0);
+        Short(1000.0), //TODO: tune these to actual positions, in MILIMETERS
+        Medium(3315.0),
+        Long(30000.0);
 
         public final LiftPosition pos;
 

@@ -11,7 +11,7 @@ public class ConeXYCommand extends InstantCommand {
         super(() -> {
             double armAngle = Math.acos(x / arm.RADIUS);
             double liftHeight = y - arm.RADIUS * Math.sin(armAngle);
-            arm.setAngle(Math.toDegrees(armAngle));
+            arm.setAngle(armAngle);
             lift.setHeight(new LiftPosition(liftHeight));
         }, arm, lift);
     }

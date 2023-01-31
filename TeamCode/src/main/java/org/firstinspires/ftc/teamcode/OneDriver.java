@@ -34,25 +34,25 @@ public class OneDriver extends CommandOpMode {
 
         gamepad.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
                 .whenPressed(new InstantCommand(() -> {
-                    arm.setAngle(0);
+                    arm.setAngle(72.6);
                     xOffset.set(0.0);
                     lift.setOffset(0);
                     lift.down();
                 }, lift, arm));
         gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
                 .whenPressed(new InstantCommand(() -> {
-                    arm.setAngle(0);
+                    arm.setAngle(180);
                     xOffset.set(0.0);
                     lift.setOffset(0);
                     lift.up();
                 }, lift, arm));
-        gamepad.getGamepadButton(GamepadKeys.Button.DPAD_UP)
+        gamepad.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
                 .whenPressed(new InstantCommand(() -> {
-                    schedule(new ConeXYCommand(arm, lift, xOffset.updateAndGet(v -> v + 10), lift.getHeight()));
+                    schedule(new ConeXYCommand(arm, lift, xOffset.updateAndGet(v -> v + 10), lift.getTargetHeight()));
                 }));
-        gamepad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
+        gamepad.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
                 .whenPressed(new InstantCommand(() -> {
-                    schedule(new ConeXYCommand(arm, lift, xOffset.updateAndGet(v -> v - 10), lift.getHeight()));
+                    schedule(new ConeXYCommand(arm, lift, xOffset.updateAndGet(v -> v - 10), lift.getTargetHeight()));
                 }));
         gamepad.getGamepadButton(GamepadKeys.Button.A)
                 .whenPressed(new InstantCommand(claw::toggle, claw));
